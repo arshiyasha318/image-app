@@ -6,8 +6,10 @@
 # Terraform directory
 .terraform/
 
-# Local environment variables or override files
-*.tfvars
-*.tfvars.json
-:wq!
+
+
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
 
