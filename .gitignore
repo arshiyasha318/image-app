@@ -1,0 +1,13 @@
+# Terraform state and lock files
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+
+# Terraform directory
+.terraform/
+
+# Local environment variables or override files
+*.tfvars
+*.tfvars.json
+:wq!
+
