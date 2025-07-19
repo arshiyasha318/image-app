@@ -2,13 +2,13 @@ terraform {
   required_providers {
     aws = {
       source = "hashicorp/aws"
-      version = "6.4.0"
+      version = ">= 5.95.0, < 6.0.0"
     }
   }
 }
 
 provider "aws" {
-    region = var.region
+    region = "us-east-1"
 }
 
 terraform {
@@ -17,7 +17,7 @@ terraform {
     key            = "eks-image-app/terraform.tfstate"
     region         = "us-east-1"
     encrypt        = true
-    dynamodb_table = "terraform-locks"
+    use_lockfile   = true
   }
 }
 

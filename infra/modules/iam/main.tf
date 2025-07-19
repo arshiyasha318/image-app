@@ -1,39 +1,49 @@
-data "aws_iam_policy_document" "assume_role" {
-  statement {
-    effect = "Allow"
-    principals {
-      type        = "Federated"
-      identifiers = [var.oidc_provider]
-    }
-    actions = ["sts:AssumeRoleWithWebIdentity"]
-    condition {
-      test     = "StringEquals"
-      variable = "${replace(var.oidc_provider, "https://", "")}:sub"
-      values   = ["system:serviceaccount:default:image-app"]
-    }
+resource "aws_iam_role" "irsa" {
+  name = "eks-irsa-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Effect = "Allow"
+        Principal = {
+          Federated = var.oidc_provider_arn
+        }
+        Condition = {
+          StringEquals = {
+            "${replace(var.oidc_provider_arn, ":oidc-provider/", ":")}:sub" = "system:serviceaccount:default:app-sa"
+          }
+        }
+      }
+    ]
+  })
+
+  tags = {
+    Name = "eks-irsa-role"
   }
 }
 
-resource "aws_iam_role" "irsa" {
-  name = "${var.cluster_name}-irsa-role"
-  assume_role_policy = data.aws_iam_policy_document.assume_role.json
-}
+resource "aws_iam_policy" "s3_access" {
+  name        = "S3AccessPolicy"
+  description = "Allow S3 access to image bucket"
 
-resource "aws_iam_policy" "s3_policy" {
-  name        = "${var.cluster_name}-s3-access"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
         Effect   = "Allow"
-        Action   = ["s3:*"]
-        Resource = "*"
+        Action   = ["s3:*"],
+        Resource = [
+          "arn:aws:s3:::${var.s3_bucket_name}/*",
+          "arn:aws:s3:::${var.s3_bucket_name}"
+        ]
       }
     ]
   })
 }
 
-resource "aws_iam_role_policy_attachment" "attach" {
+resource "aws_iam_role_policy_attachment" "attach_s3" {
   role       = aws_iam_role.irsa.name
-  policy_arn = aws_iam_policy.s3_policy.arn
+  policy_arn = aws_iam_policy.s3_access.arn
 }
