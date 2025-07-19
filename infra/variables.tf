@@ -1,3 +1,8 @@
+variable "instance_types" {
+  description = "Instance types for EKS node group"
+  type        = list(string)
+  default     = ["t3.medium"]
+}
 variable "vpc_cidr" {
   description = "CIDR block for the VPC"
   type        = string
@@ -46,13 +51,15 @@ variable "min_size" {
   type        = number
 }
 
-variable "instance_type" {
-  description = "Instance types for EKS worker nodes"
-  type        = string
+# variable "instance_types" {
+#   description = "Instance types for EKS worker nodes"
+#   type        = string
 
-}
+# }
 
 variable "s3_bucket_name" {
   description = "Name of the S3 bucket for image uploads"
   type        = string
 }
+
+

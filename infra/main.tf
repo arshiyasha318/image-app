@@ -1,5 +1,6 @@
 module "vpc" {
   source              = "./modules/vpc"
+  cluster_name        = var.cluster_name
   cidr_block          = var.vpc_cidr
   public_subnets      = var.public_subnets
   private_subnets     = var.private_subnets
@@ -15,7 +16,7 @@ module "eks" {
   desired_size      = var.desired_size
   max_size          = var.max_size
   min_size          = var.min_size
-  instance_types    = var.instance_type != "" ? [var.instance_type] : ["t3.medium"]
+
 } 
 
 module "iam" {
