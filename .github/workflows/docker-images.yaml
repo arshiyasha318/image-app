@@ -6,6 +6,10 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -19,10 +23,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
       - name: Build backend Docker image
         run: docker build -t image-app-backend ./backend
 
@@ -34,6 +34,10 @@ jobs:
 
       - name: Tag frontend image
         run: docker tag image-app-frontend:latest ${{ secrets.ECR_REGISTRY }}/image-app-frontend:latest
+        
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Push backend image to ECR
         run: docker push ${{ secrets.ECR_REGISTRY }}/image-app-backend:latest
