@@ -1,0 +1,42 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: 
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build backend Docker image
+        run: docker build -t image-app-backend ./backend
+
+      - name: Build frontend Docker image
+        run: docker build -t image-app-frontend ./frontend
+
+      - name: Tag backend image
+        run: docker tag image-app-backend:latest ${{ secrets.ECR_REGISTRY }}/image-app-backend:latest
+
+      - name: Tag frontend image
+        run: docker tag image-app-frontend:latest ${{ secrets.ECR_REGISTRY }}/image-app-frontend:latest
+
+      - name: Push backend image to ECR
+        run: docker push ${{ secrets.ECR_REGISTRY }}/image-app-backend:latest
+
+      - name: Push frontend image to ECR
+        run: docker push ${{ secrets.ECR_REGISTRY }}/image-app-frontend:latest

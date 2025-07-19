@@ -1,0 +1,13 @@
+vpc_cidr           = "10.0.0.0/16"
+public_subnets     = ["10.0.1.0/24", "10.0.3.0/24"]
+private_subnets    = ["10.0.2.0/24", "10.0.4.0/24"]
+availability_zones = ["us-east-1a", "us-east-1b"]
+cluster_name       = "image-cluster"
+node_group_name    = "image-node-group"
+desired_size       = 2
+max_size           = 3
+min_size           = 1
+instance_type     = "t3.medium"
+s3_bucket_name     = "image-upload-bucket-dev-20250719"
+# domain_name      = "yourdomain.com"
+# # route53_zone_id  = "Z01234567890ABCDEF"

@@ -1,42 +1,37 @@
 variable "cluster_name" {
-  type        = string
-  description = "Name of the EKS cluster"
+  type = string
 }
 
-variable "kubernetes_version" {
-  type        = string
-  default     = "1.29"
+variable "node_group_name" {
+  type = string
+}
+
+variable "desired_size" {
+  type = number
+}
+
+variable "max_size" {
+  type = number
+}
+
+variable "min_size" {
+  type = number
+}
+
+variable "instance_types" {
+  type = list(string)
+}
+
+variable "vpc_id" {
+  type = string
 }
 
 variable "subnet_ids" {
+  type = list(string)
+}
+
+variable "instance_type" {
+  description = "Instance types for EKS node group"
   type        = list(string)
-  description = "List of subnet IDs for EKS"
-}
-
-variable "eks_role_arn" {
-  type        = string
-  description = "IAM role ARN for EKS control plane"
-}
-
-variable "fargate_pod_execution_role_arn" {
-  type        = string
-  description = "IAM role ARN for Fargate pod execution"
-}
-
-variable "fargate_profiles" {
-  type = map(object({
-    subnet_ids = list(string)
-    namespace  = string
-  }))
-  description = "Map of Fargate profiles"
-}
-
-variable "service_ipv4_cidr" {
-  type        = string
-  default     = "172.20.0.0/16"
-}
-
-variable "tags" {
-  type        = map(string)
-  default     = {}
+  default     = ["t3.medium"]
 }
