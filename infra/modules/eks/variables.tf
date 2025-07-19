@@ -18,9 +18,6 @@ variable "min_size" {
   type = number
 }
 
-variable "instance_types" {
-  type = list(string)
-}
 
 variable "vpc_id" {
   type = string
@@ -30,7 +27,7 @@ variable "subnet_ids" {
   type = list(string)
 }
 
-variable "instance_type" {
+variable "instance_types" {
   description = "Instance types for EKS node group"
   type        = list(string)
   default     = ["t3.medium"]

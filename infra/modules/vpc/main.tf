@@ -14,6 +14,7 @@ resource "aws_subnet" "public" {
 
   tags = {
     Name = "public-subnet-${count.index}"
+    "kubernetes.io/cluster/${var.cluster_name}" = "owned"
   }
 }
 
@@ -25,5 +26,6 @@ resource "aws_subnet" "private" {
 
   tags = {
     Name = "private-subnet-${count.index}"
+    "kubernetes.io/cluster/${var.cluster_name}" = "owned"
   }
 }
