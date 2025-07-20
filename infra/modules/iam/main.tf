@@ -47,3 +47,5 @@ resource "aws_iam_role_policy_attachment" "attach_s3" {
   role       = aws_iam_role.irsa.name
   policy_arn = aws_iam_policy.s3_access.arn
 }
+
+
