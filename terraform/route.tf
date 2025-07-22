@@ -25,6 +25,18 @@ resource "aws_route_table" "public" {
   }
 }
 
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.k8svpc.id
+
+  route {
+      cidr_block                 = "0.0.0.0/0"
+      nat_gateway_id             = aws_nat_gateway.k8s-nat.id
+    }
+
+  tags = {
+    Name = "private"
+  }
+}
 
 # routing table association
 
