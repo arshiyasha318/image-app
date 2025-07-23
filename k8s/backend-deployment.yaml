@@ -2,8 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend
+  namespace: s3-access-sa
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: backend
@@ -12,27 +13,24 @@ spec:
       labels:
         app: backend
     spec:
-      serviceAccountName: s3-access-sa
       containers:
         - name: backend
-          image: 257394477599.dkr.ecr.us-east-1.amazonaws.com/image-app-backend:latest
+          image: "257394477599.dkr.ecr.us-east-1.amazonaws.com/image-app-backend"
           ports:
             - containerPort: 5000
-          env:
-            - name: AWS_REGION
-              value: us-east-1
-            - name: S3_BUCKET
-              value: image-upload-bucket-dev-20250719
-
+          envFrom:
+            - configMapRef:
+                name: backend-config
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend 
+  name: backend
+  namespace: s3-access-sa
 spec:
+  type: ClusterIP
   selector:
     app: backend
   ports:
-    - port: 80
+    - port: 5000
       targetPort: 5000
-  type: ClusterIP

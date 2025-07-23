@@ -1,8 +1,6 @@
-# serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: s3-access-sa
-  namespace: default
   annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::<ACCOUNT_ID>:role/<your-irsa-role-name>
+    eks.amazonaws.com/role-arn: arn:aws:iam::257394477599:policy/s3-access-policy
