@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const backendURL = "http://localhost:5000/api";
+const backendURL = "http://k8s-imageapp-0a0239dfa2-1273944766.us-east-1.elb.amazonaws.com/api"; // Replace with your backend URL
 
 function App() {
   const [image, setImage] = useState(null);

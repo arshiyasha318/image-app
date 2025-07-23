@@ -15,7 +15,7 @@ resource "aws_subnet" "private-us-east-1a" {
   tags = {
     Name                              = "private-us-east-1a"
     "kubernetes.io/role/internal-elb" = "1"
-    "kubernetes.io/cluster/demo"      = "owned"
+    "kubernetes.io/cluster/image-app"      = "owned"
   }
 }
 # Private subnet 02 for internal workloads
@@ -27,7 +27,7 @@ resource "aws_subnet" "private-us-east-1b" {
   tags = {
     Name                              = "private-us-east-1b"
     "kubernetes.io/role/internal-elb" = "1"
-    "kubernetes.io/cluster/demo"      = "owned"
+    "kubernetes.io/cluster/image-app"      = "owned"
   }
 }
 
@@ -41,7 +41,7 @@ resource "aws_subnet" "public-us-east-1a" {
   tags = {
     Name                         = "public-us-east-1a"
     "kubernetes.io/role/elb"     = "1" # Instructs Kubernetes to create public load balancer in these subnets
-    "kubernetes.io/cluster/demo" = "owned"
+    "kubernetes.io/cluster/image-app" = "owned"
   }
 }
 # Public subnet 02 for load balancers and NAT
@@ -54,7 +54,7 @@ resource "aws_subnet" "public-us-east-1b" {
   tags = {
     Name                         = "public-us-east-1b"
     "kubernetes.io/role/elb"     = "1" # Instructs Kubernetes to create public load balancer in these subnets
-    "kubernetes.io/cluster/demo" = "owned"
+    "kubernetes.io/cluster/image-app" = "owned"
   }
 } 
 

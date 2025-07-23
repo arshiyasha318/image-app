@@ -13,6 +13,7 @@ spec:
       labels:
         app: frontend
     spec:
+      serviceAccountName: s3-access-sa
       containers:
         - name: frontend
           image: "257394477599.dkr.ecr.us-east-1.amazonaws.com/image-app-frontend"
