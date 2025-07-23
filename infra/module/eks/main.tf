@@ -1,8 +1,8 @@
 resource "aws_eks_cluster" "image-app" {
   name     = var.cluster_name
+  version  = var.eks_version
   role_arn = module.iam.image-app_role_arn
-  version  = var.version
- 
+
   tags = {
     Name = "image-app-eks-cluster"
   }
