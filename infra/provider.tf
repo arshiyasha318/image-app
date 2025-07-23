@@ -1,3 +1,4 @@
+# Terraform block specifying required providers
 terraform {
   required_providers {
     aws = {
@@ -7,10 +8,12 @@ terraform {
   }
 }
 
+# AWS provider configuration
 provider "aws" {
     region = var.region
 }
 
+# Configure remote backend for storing Terraform state in S3
 terraform {
   backend "s3" {
     bucket         = "image-terraform-state-bucket"   

@@ -1,3 +1,4 @@
+# VPC resource for Kubernetes cluster
 resource "aws_vpc" "k8svpc" {
   cidr_block = var.cidr_block 
   tags = {
@@ -5,8 +6,7 @@ resource "aws_vpc" "k8svpc" {
   }
 } 
 
-# private subnet 01
-
+# Private subnet 01 for internal workloads
 resource "aws_subnet" "private-us-east-1a" {
   vpc_id            = aws_vpc.k8svpc.id
   cidr_block        = var.private_subnet_cidrs[0]
@@ -18,8 +18,7 @@ resource "aws_subnet" "private-us-east-1a" {
     "kubernetes.io/cluster/demo"      = "owned"
   }
 }
-# private subnet 02
-
+# Private subnet 02 for internal workloads
 resource "aws_subnet" "private-us-east-1b" {
   vpc_id            = aws_vpc.k8svpc.id
   cidr_block        = var.private_subnet_cidrs[1]
@@ -32,8 +31,7 @@ resource "aws_subnet" "private-us-east-1b" {
   }
 }
 
-# public subnet 01
-
+# Public subnet 01 for load balancers and NAT
 resource "aws_subnet" "public-us-east-1a" {
   vpc_id                  = aws_vpc.k8svpc.id
   cidr_block              = var.public_subnet_cidrs[0]
@@ -42,12 +40,11 @@ resource "aws_subnet" "public-us-east-1a" {
 
   tags = {
     Name                         = "public-us-east-1a"
-    "kubernetes.io/role/elb"     = "1" #this instruct the kubernetes to create public load balancer in these subnets
+    "kubernetes.io/role/elb"     = "1" # Instructs Kubernetes to create public load balancer in these subnets
     "kubernetes.io/cluster/demo" = "owned"
   }
 }
-# public subnet 02
-
+# Public subnet 02 for load balancers and NAT
 resource "aws_subnet" "public-us-east-1b" {
   vpc_id                  = aws_vpc.k8svpc.id
   cidr_block              = var.public_subnet_cidrs[1]
@@ -56,12 +53,12 @@ resource "aws_subnet" "public-us-east-1b" {
 
   tags = {
     Name                         = "public-us-east-1b"
-    "kubernetes.io/role/elb"     = "1" #this instruct the kubernetes to create public load balancer in these subnets
+    "kubernetes.io/role/elb"     = "1" # Instructs Kubernetes to create public load balancer in these subnets
     "kubernetes.io/cluster/demo" = "owned"
   }
 } 
 
-
+# Internet Gateway for public subnets
 resource "aws_internet_gateway" "k8svpc-igw" {
   vpc_id = aws_vpc.k8svpc.id
 
@@ -70,27 +67,28 @@ resource "aws_internet_gateway" "k8svpc-igw" {
   }
 } 
 
+# Public route table for internet access
 resource "aws_route_table" "k8svpc-public" {
   vpc_id = aws_vpc.k8svpc.id
 
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.k8svpc-igw.id
-
   } 
-    tags = {
-        Name = "k8svpc-public"
-    }
-depends_on = [ aws_internet_gateway.k8svpc-igw] 
+  tags = {
+    Name = "k8svpc-public"
+  }
+  depends_on = [ aws_internet_gateway.k8svpc-igw] 
 } 
 
+# Elastic IP for NAT Gateway
 resource "aws_eip" "nat" {
-
   tags = {
     Name = "nat"
   }
 }
 
+# NAT Gateway for private subnet internet access
 resource "aws_nat_gateway" "k8s-nat" {
   allocation_id = aws_eip.nat.id
   subnet_id     = aws_subnet.public-us-east-1a.id
@@ -102,6 +100,7 @@ resource "aws_nat_gateway" "k8s-nat" {
   depends_on = [aws_internet_gateway.k8svpc-igw]
 } 
 
+# Private route table for NAT access
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.k8svpc.id
 
@@ -115,7 +114,7 @@ resource "aws_route_table" "private" {
   }
 }
 
-
+# Associate private subnets with private route table
 resource "aws_route_table_association" "private-us-east-1a" {
   subnet_id      = aws_subnet.private-us-east-1a.id
   route_table_id = aws_route_table.private.id
@@ -126,6 +125,7 @@ resource "aws_route_table_association" "private-us-east-1b" {
   route_table_id =  aws_route_table.private.id
 }
 
+# Associate public subnets with public route table
 resource "aws_route_table_association" "public-us-east-1a" {
   subnet_id      = aws_subnet.public-us-east-1a.id
   route_table_id = aws_route_table.k8svpc-public.id
