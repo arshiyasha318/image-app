@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const backendURL = "http://k8s-imageapp-0a0239dfa2-1273944766.us-east-1.elb.amazonaws.com/api"; // Replace with your backend URL
+// Use environment variable for backend URL, fallback to localhost for dev
+const backendURL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000/api";
 
 function App() {
   const [image, setImage] = useState(null);
   const [images, setImages] = useState([]);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     fetchImages();
@@ -26,11 +28,12 @@ function App() {
 
   const handleUpload = async () => {
     if (!image) return alert("Please choose an image!");
-
+    setUploading(true);
     try {
-      // Request presigned URL from backend
+      // Request presigned URL from backend, send filename
       const { data } = await axios.post(`${backendURL}/upload`, {
         content_type: image.type,
+        filename: image.name,
       });
 
       // Upload directly to S3 using PUT
@@ -47,14 +50,15 @@ function App() {
       console.error("Upload failed:", err);
       alert("Upload failed");
     }
+    setUploading(false);
   };
 
   return (
     <div style={{ padding: 40, fontFamily: "Arial" }}>
       <h1>🖼️ Image Uploader</h1>
       <input type="file" accept="image/*" onChange={handleChange} />
-      <button onClick={handleUpload} style={{ marginLeft: 10 }}>
-        Upload
+      <button onClick={handleUpload} style={{ marginLeft: 10 }} disabled={uploading}>
+        {uploading ? "Uploading..." : "Upload"}
       </button>
 
       <hr style={{ margin: "40px 0" }} />
