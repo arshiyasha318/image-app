@@ -99,7 +99,7 @@ resource "aws_iam_role" "irsa" {
       Action = "sts:AssumeRoleWithWebIdentity",
       Condition = {
         StringEquals = {
-          "${var.oidc_provider_url_without_scheme}:sub" = "system:serviceaccount:default:s3-access-sa"
+          "${var.oidc_provider_url_without_scheme}:sub" = "system:serviceaccount:s3-access-sa:s3-access-sa"
         }
       }
     }]
