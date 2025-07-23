@@ -8,16 +8,26 @@ module "vpc" {
   private_subnet_cidrs  = var.private_subnets
 }
 
-# OIDC module: sets up OIDC provider for IRSA
-module "oidc" {
-  source       = "./modules/oidc"
-  cluster_name = var.cluster_name
+# EKS cluster module: provisions EKS control plane only
+module "eks_cluster" {
+  source            = "./modules/eks"
+  cluster_name      = var.cluster_name
+  eks_version       = var.eks_version
+  cluster_role_arn  = module.iam.eks_cluster_role_arn
+  private_subnet_cidrs = var.private_subnets
+  public_subnet_cidrs  = var.public_subnets
 }
 
-# IAM module: creates IAM roles for EKS cluster, nodes, and IRSA
+# OIDC module: sets up OIDC provider for IRSA, depends on EKS cluster
+module "oidc" {
+  source       = "./modules/oidc"
+  cluster_name = module.eks_cluster.cluster_name
+  depends_on = [module.eks_cluster]
+}
+
+# IAM module: creates IAM roles for EKS cluster, nodes, and IRSA, depends on OIDC
 module "iam" {
   source = "./modules/iam"
-
   s3_bucket_name                 = module.s3.bucket_name
   oidc_provider_arn             = module.oidc.oidc_provider_arn
   oidc_provider_url_without_scheme = module.oidc.oidc_provider_url_without_scheme
@@ -29,26 +39,16 @@ module "s3" {
   bucket_name = var.s3_bucket_name
 }
 
-# EKS module: provisions EKS cluster and node group
-module "eks" {
-  source            = "./modules/eks"
-  cluster_name      = var.cluster_name
-  eks_version       = var.eks_version
-  cluster_role_arn  = module.iam.eks_cluster_role_arn
-  instance_types    = var.instance_types
+# EKS node group module: provisions EKS node group, depends on IAM
+module "eks_node_group" {
+  source            = "./modules/eks_node_group"
+  cluster_name      = module.eks_cluster.cluster_name
   node_group_name   = var.node_group_name
+  node_role_arn     = module.iam.eks_node_role_arn
+  instance_types    = var.instance_types
   desired_size      = var.desired_size
   max_size          = var.max_size
   min_size          = var.min_size
-
-  # Pass required subnet CIDRs to the EKS module
-  private_subnet_cidrs = var.private_subnets   # List of private subnet CIDRs for node group placement
-  public_subnet_cidrs  = var.public_subnets    # List of public subnet CIDRs for cluster networking
-
-  # Pass the node IAM role ARN for the node group
-  node_role_arn        = module.iam.eks_node_role_arn
-
-  # Remove unsupported subnet_ids argument (handled inside the module)
-  # depends_on ensures IAM roles are created before EKS
+  private_subnet_cidrs = var.private_subnets
   depends_on = [module.iam]
 } 
