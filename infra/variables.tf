@@ -42,11 +42,6 @@ variable "s3_bucket_name" {
   
 } 
 
-variable "image_app_role_arn" {
-  description = "The ARN of the IAM role for the EKS cluster"
-  type        = string
-  
-} 
 
 variable "cluster_name" {
   description = "The name of the EKS cluster"
@@ -63,5 +58,22 @@ variable "instance_types" {
   description = "List of instance types for the EKS node group"
   type        = list(string)
   
+} 
+
+variable "desired_size" {
+  description = "Desired number of nodes in the EKS node group"
+  type        = number
+  
+}
+variable "min_size" {
+  description = "Minimum number of nodes in the EKS node group"
+  type        = number
+
+}
+
+variable "max_size" {
+  description = "Maximum number of nodes in the EKS node group"
+  type        = number
+
 } 
 

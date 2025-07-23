@@ -1,7 +1,7 @@
 resource "aws_eks_cluster" "image-app" {
   name     = var.cluster_name
   version  = var.eks_version
-  role_arn = module.iam.image-app_role_arn
+  role_arn = var.cluster_role_arn
 
   tags = {
     Name = "image-app-eks-cluster"
@@ -42,9 +42,10 @@ resource "aws_eks_node_group" "private-nodes" {
   instance_types = var.instance_types
 
   scaling_config {
-    desired_size = 1
-    max_size     = 1
-    min_size     = 0
+    desired_size = var.desired_size
+    max_size     = var.max_size
+    min_size     = var.min_size
+   
   }
 
   update_config {
