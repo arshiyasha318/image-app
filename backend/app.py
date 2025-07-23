@@ -11,7 +11,7 @@ app = Flask(__name__)
 CORS(app)
 
 AWS_REGION = os.getenv("AWS_REGION")
-S3_BUCKET = os.getenv("S3_BUCKET")
+S3_BUCKET = os.getenv("S3_BUCKET_NAME")
 
 # Use default boto3 session to pick up IAM role automatically
 s3 = boto3.client("s3", region_name=AWS_REGION)
