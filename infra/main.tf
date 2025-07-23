@@ -14,8 +14,8 @@ module "eks_cluster" {
   cluster_name      = var.cluster_name
   eks_version       = var.eks_version
   cluster_role_arn  = module.iam.eks_cluster_role_arn
-  private_subnet_cidrs = var.private_subnets
-  public_subnet_cidrs  = var.public_subnets
+  private_subnet_cidrs = module.vpc.private_subnet_ids   # Use subnet IDs, not CIDRs
+  public_subnet_cidrs  = module.vpc.public_subnet_ids    # Use subnet IDs, not CIDRs
 }
 
 # OIDC module: sets up OIDC provider for IRSA, depends on EKS cluster
@@ -49,6 +49,6 @@ module "eks_node_group" {
   desired_size      = var.desired_size
   max_size          = var.max_size
   min_size          = var.min_size
-  private_subnet_cidrs = var.private_subnets
+  private_subnet_cidrs = module.vpc.private_subnet_ids   # Use subnet IDs, not CIDRs
   depends_on = [module.iam]
 } 
