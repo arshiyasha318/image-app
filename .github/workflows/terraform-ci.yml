@@ -45,13 +45,17 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+  
       - name: Terraform Init
+        if: ${{ github.event_name == 'push' || (github.event.inputs.action == 'apply')  }}
         working-directory: infra
         run: terraform init
 
       - name: Terraform Apply
         if: ${{ github.event_name == 'push' || (github.event.inputs.action == 'apply') }}
-        run: terraform apply -auto-approve -var-file="terraform.tfvars"
+        run: |
+            cd infra
+            terraform apply -auto-approve 
 
       - name: Confirm destroy check
         if: ${{ github.event.inputs.action == 'destroy' && github.event.inputs.confirm_destroy != 'YES' }}
@@ -61,4 +65,7 @@ jobs:
 
       - name: Terraform Destroy
         if: ${{ github.event.inputs.action == 'destroy' && github.event.inputs.confirm_destroy == 'YES' }}
-        run: terraform destroy -auto-approve -var-file="terraform.tfvars"
+        run: |
+            cd infra
+            echo "Destroying infrastructure..."
+            terraform destroy -auto-approve 
