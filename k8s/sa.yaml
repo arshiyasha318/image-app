@@ -13,4 +13,4 @@ metadata:
   name: s3-access-sa
   namespace: s3-access-sa
   annotations:
-     eks.amazonaws.com/role-arn: arn:aws:iam::257394477599:role/s3_access_policy
+     eks.amazonaws.com/role-arn: arn:aws:iam::257394477599:role/irsa-s3-access
