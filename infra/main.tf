@@ -52,3 +52,36 @@ module "eks_node_group" {
   private_subnet_cidrs = module.vpc.private_subnet_ids   # Use subnet IDs, not CIDRs
   depends_on = [module.iam]
 } 
+
+
+# ALB Controller module: provisions AWS Load Balancer Controller, depends on IAM and OIDC
+module "alb_controller" {
+  source = "./modules/alb_controller"
+  cluster_name        = module.eks_cluster.cluster_name
+  region              = var.region
+  vpc_id              = module.vpc.vpc_id
+  oidc_provider_arn   = module.oidc.oidc_provider_arn
+  oidc_provider_url   = module.oidc.oidc_provider_url_without_scheme
+  depends_on = [ module.iam, module.oidc, module.eks_cluster , module.eks_node_group , module.vpc ]
+}
+
+# Apply Kubernetes manifests for the application
+
+resource "null_resource" "apply_k8s_manifests" {
+  provisioner "local-exec" {
+    command = "kubectl apply -f ./k8s/*"
+    environment = {
+      KUBECONFIG = "~/.kube/config"
+    }
+  }
+
+  triggers = {
+    cluster_name = module.eks_cluster.cluster_name
+    alb_controller_role_arn = module.alb_controller.alb_controller_role_arn
+  }
+
+  depends_on = [
+    module.eks,
+    module.alb_controller
+  ]
+} 

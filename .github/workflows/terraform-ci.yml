@@ -1,0 +1,64 @@
+name: Terraform CI
+
+on:
+  push:
+    branches: 
+        - main
+        - develop
+
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Terraform action to perform'
+        required: true
+        default: 'apply'
+        type: choice
+        options:
+          - apply
+          - destroy
+      confirm_destroy:
+        description: 'Type YES to confirm destroy'
+        required: false
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: us-east-1
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        if: ${{ github.event_name == 'push' || (github.event.inputs.action == 'apply') }}
+        run: terraform apply -auto-approve -var-file="terraform.tfvars"
+
+      - name: Confirm destroy check
+        if: ${{ github.event.inputs.action == 'destroy' && github.event.inputs.confirm_destroy != 'YES' }}
+        run: |
+          echo "You must confirm destroy by typing YES"
+          exit 1
+
+      - name: Terraform Destroy
+        if: ${{ github.event.inputs.action == 'destroy' && github.event.inputs.confirm_destroy == 'YES' }}
+        run: terraform destroy -auto-approve -var-file="terraform.tfvars"
