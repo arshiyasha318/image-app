@@ -47,7 +47,6 @@ jobs:
 
   
       - name: Terraform Init
-        if: ${{ github.event_name == 'push' || (github.event.inputs.action == 'apply')  }}
         working-directory: infra
         run: terraform init
 
