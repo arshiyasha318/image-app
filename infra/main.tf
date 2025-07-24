@@ -81,7 +81,7 @@ resource "null_resource" "apply_k8s_manifests" {
   }
 
   depends_on = [
-    module.eks,
-    module.alb_controller
+    module.eks_cluster,
+    module.eks_node_group
   ]
 } 

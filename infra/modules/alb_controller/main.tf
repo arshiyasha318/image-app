@@ -42,33 +42,26 @@ resource "helm_release" "alb_controller" {
   chart      = "aws-load-balancer-controller"
   version    = "1.7.1"
 
-  set {
-    name  = "clusterName"
-    value = var.cluster_name
-  }
-
-  set {
-    name  = "region"
-    value = var.region
-  }
-
-  set {
-    name  = "vpcId"
-    value = var.vpc_id
-  }
-
-  set {
-    name  = "serviceAccount.create"
-    value = "false"
-  }
-
-  set {
-    name  = "serviceAccount.name"
-    value = kubernetes_service_account.alb_sa.metadata[0].name
-  }
-
-  depends_on = [
-    kubernetes_service_account.alb_sa,
-    aws_iam_role_policy_attachment.alb_policy
+  set = [
+    {
+      name  = "clusterName"
+      value = var.cluster_name
+    },
+    {
+      name  = "region"
+      value = var.region
+    },
+    {
+      name  = "vpcId"
+      value = var.vpc_id
+    },
+    {
+      name  = "serviceAccount.create"
+      value = "false"
+    },
+    {
+      name  = "serviceAccount.name"
+      value = kubernetes_service_account.alb_sa.metadata[0].name
+    }
   ]
 }

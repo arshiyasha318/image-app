@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 // Use environment variable for backend URL, fallback to localhost for dev
-const backendURL = process.env.REACT_APP_BACKEND_URL || "http://k8s-imageapp-0a0239dfa2-1273944766.us-east-1.elb.amazonaws.com/api";
+const backendURL = process.env.REACT_APP_BACKEND_URL || "https://nagendraops.info/api";
 
 function App() {
   const [image, setImage] = useState(null);
