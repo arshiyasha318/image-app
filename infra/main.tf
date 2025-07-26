@@ -65,7 +65,7 @@ module "alb_controller" {
   depends_on = [ module.iam, module.oidc, module.eks_cluster , module.eks_node_group , module.vpc ]
 }
 
-# Apply Kubernetes manifests for the application
+#Apply Kubernetes manifests for the application
 
 resource "null_resource" "apply_k8s_manifests" {
   provisioner "local-exec" {
@@ -75,10 +75,7 @@ resource "null_resource" "apply_k8s_manifests" {
     }
   }
 
-  triggers = {
-    cluster_name = module.eks_cluster.cluster_name
-    alb_controller_role_arn = module.alb_controller.alb_controller_role_arn
-  }
+
 
   depends_on = [
     module.eks_cluster,
