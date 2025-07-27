@@ -1,3 +1,21 @@
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.cluster.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.cluster.token
+}
+
+data "aws_eks_cluster" "cluster" {
+  name = var.cluster_name
+}
+
+data "aws_eks_cluster_auth" "cluster" {
+  name = var.cluster_name
+}
+
+data "aws_iam_openid_connect_provider" "oidc" {
+  url = data.aws_eks_cluster.cluster.identity[0].oidc[0].issuer
+}
+
 resource "aws_iam_role" "alb_controller" {
   name = "alb-controller-irsa"
 
@@ -7,12 +25,12 @@ resource "aws_iam_role" "alb_controller" {
       {
         Effect = "Allow",
         Principal = {
-          Federated = var.oidc_provider_arn
+          Federated = data.aws_iam_openid_connect_provider.oidc.arn
         },
         Action = "sts:AssumeRoleWithWebIdentity",
         Condition = {
           StringEquals = {
-            "${var.oidc_provider_url}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
+            "${replace(data.aws_eks_cluster.cluster.identity[0].oidc[0].issuer, "https://", "")}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
           }
         }
       }
