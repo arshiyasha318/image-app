@@ -22,3 +22,12 @@ variable "oidc_provider_url" {
   type        = string
   description = "OIDC provider URL without https:// prefix"
 }
+
+
+variable "cluster_endpoint" {
+  type = string
+}
+
+variable "cluster_ca" {
+  type = string
+}
