@@ -101,7 +101,7 @@ resource "null_resource" "apply_k8s_manifests" {
   provisioner "local-exec" {
     command = <<EOT
       aws eks update-kubeconfig --region us-east-1 --name ${module.eks_cluster.cluster_name}
-      kubectl apply -f ./k8s/
+      kubectl apply -f image-app/k8s/
     EOT
 
     environment = {
