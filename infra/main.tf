@@ -62,7 +62,7 @@ module "alb_controller" {
   vpc_id              = module.vpc.vpc_id
   oidc_provider_arn   = module.oidc.oidc_provider_arn
   oidc_provider_url   = module.oidc.oidc_provider_url_without_scheme
-  depends_on = [ module.iam, module.oidc, module.eks_cluster , module.eks_node_group , module.vpc ]
+  # depends_on = [ module.iam, module.oidc, module.eks_cluster , module.eks_node_group , module.vpc ]
 }
 
 # Route module: acm & Route53 records, 
