@@ -23,4 +23,16 @@ resource "aws_s3_bucket_versioning" "versioning" {
     status = "Enabled"
   }
 } 
+# Enable CROS for the S3 bucket to allow cross-origin requests
+resource "aws_s3_bucket_cors_configuration" "cors" {
+  bucket = aws_s3_bucket.image_upload.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "POST", "PUT", "DELETE", "HEAD"]
+    allowed_origins = ["*"]
+    expose_headers  = ["ETag", "x-amz-request-id", "x-amz-id-2"]
+    max_age_seconds = 3000
+  }
+}
 
