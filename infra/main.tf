@@ -102,7 +102,7 @@ resource "null_resource" "apply_k8s_manifests" {
     command = <<EOT
       aws eks update-kubeconfig --region us-east-1 --name ${module.eks_cluster.cluster_name}
       kubectl apply -f image-app/k8s/
-      bash ${path.module}/image-app/k8s/install-alb-controller.sh
+      bash ${path.module}/image-app/k8s/alb-controller.sh
     EOT
 
     environment = {
