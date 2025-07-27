@@ -63,7 +63,7 @@ module "alb_controller" {
   oidc_provider_arn   = module.oidc.oidc_provider_arn
   oidc_provider_url   = module.oidc.oidc_provider_url_without_scheme
   cluster_endpoint    = module.eks_cluster.cluster_endpoint
-  cluster_ca          = module.eks_cluster.cluster_certificate_authority_data
+  cluster_ca          = module.eks_cluster.certificate_authority
 
   # depends_on = [ module.iam, module.oidc, module.eks_cluster , module.eks_node_group , module.vpc ]
 }
