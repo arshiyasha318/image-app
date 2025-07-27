@@ -53,6 +53,15 @@ module "eks_node_group" {
   depends_on = [module.iam]
 } 
 
+
+data "aws_eks_cluster" "cluster" {
+  name = module.eks_cluster.cluster_name
+}
+
+data "aws_eks_cluster_auth" "cluster" {
+  name = module.eks_cluster.cluster_name
+}
+
 provider "kubernetes" {
   alias                  = "eks"
   host                   = data.aws_eks_cluster.cluster.endpoint
