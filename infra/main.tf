@@ -101,17 +101,13 @@ resource "null_resource" "apply_k8s_manifests" {
   provisioner "local-exec" {
     command = <<EOT
       aws eks update-kubeconfig --region us-east-1 --name ${module.eks_cluster.cluster_name}
-      kubectl apply -f image-app/k8s/
-      bash ${path.module}/image-app/k8s/alb-controller.sh
+      kubectl apply -f ${path.module}/../k8s/
+      bash ${path.module}/../k8s/alb-controller.sh
     EOT
 
     environment = {
       KUBECONFIG = "${pathexpand("~/.kube/config")}"
     }
   }
-
-  # depends_on = [
-  #   module.eks_cluster,
-  #   module.eks_node_group
-  # ]
 }
+
