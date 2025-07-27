@@ -100,6 +100,8 @@ module "route" {
 resource "null_resource" "apply_k8s_manifests" {
   provisioner "local-exec" {
     command = <<EOT
+      curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+      sudo mv /tmp/eksctl /usr/local/bin
       aws eks update-kubeconfig --region us-east-1 --name ${module.eks_cluster.cluster_name}
       kubectl apply -f ${path.module}/../k8s/
       bash ${path.module}/../k8s/alb-controller.sh
