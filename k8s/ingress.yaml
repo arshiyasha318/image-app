@@ -9,7 +9,7 @@ metadata:
     alb.ingress.kubernetes.io/group.name: image-app
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
     alb.ingress.kubernetes.io/ssl-redirect: '443'
-    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:257394477599:certificate/36c52227-a461-4c9b-a8a2-61c3fb814079
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:257394477599:certificate/2c26b6f5-6ee8-4712-a4d8-10fd23b7c33d
 spec:
   ingressClassName: alb
   rules:

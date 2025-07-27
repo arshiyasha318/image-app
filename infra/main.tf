@@ -65,20 +65,27 @@ module "alb_controller" {
   depends_on = [ module.iam, module.oidc, module.eks_cluster , module.eks_node_group , module.vpc ]
 }
 
+# Route module: acm & Route53 records, 
+module "route" {
+  source = "./modules/route"
+ 
+}
 #Apply Kubernetes manifests for the application
 
 resource "null_resource" "apply_k8s_manifests" {
   provisioner "local-exec" {
-    command = "kubectl apply -f ./k8s/*"
+    command = <<EOT
+      aws eks update-kubeconfig --region us-east-1 --name ${module.eks_cluster.cluster_name}
+      kubectl apply -f ./k8s/
+    EOT
+
     environment = {
-      KUBECONFIG = "~/.kube/config"
+      KUBECONFIG = "${pathexpand("~/.kube/config")}"
     }
   }
-
-
 
   depends_on = [
     module.eks_cluster,
     module.eks_node_group
   ]
-} 
+}

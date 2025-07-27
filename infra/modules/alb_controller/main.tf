@@ -64,4 +64,8 @@ resource "helm_release" "alb_controller" {
       value = kubernetes_service_account.alb_sa.metadata[0].name
     }
   ]
+
+  depends_on = [
+    kubernetes_service_account.alb_sa
+  ]
 }
