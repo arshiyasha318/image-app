@@ -53,6 +53,13 @@ module "eks_node_group" {
   depends_on = [module.iam]
 } 
 
+provider "kubernetes" {
+  alias                  = "eks"
+  host                   = data.aws_eks_cluster.cluster.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.cluster.token
+
+}
 
 # ALB Controller module: provisions AWS Load Balancer Controller, depends on IAM and OIDC
 module "alb_controller" {
@@ -63,7 +70,11 @@ module "alb_controller" {
   oidc_provider_arn   = module.oidc.oidc_provider_arn
   oidc_provider_url   = module.oidc.oidc_provider_url_without_scheme
   cluster_endpoint    = module.eks_cluster.cluster_endpoint
-  cluster_ca          = module.eks_cluster.certificate_authority
+  cluster_ca          = module.eks_cluster.certificate_authority 
+
+  providers = {
+    kubernetes = kubernetes.eks
+  }
 
   # depends_on = [ module.iam, module.oidc, module.eks_cluster , module.eks_node_group , module.vpc ]
 }
@@ -73,6 +84,8 @@ module "route" {
   source = "./modules/route"
  
 }
+
+
 #Apply Kubernetes manifests for the application
 
 resource "null_resource" "apply_k8s_manifests" {
@@ -87,8 +100,8 @@ resource "null_resource" "apply_k8s_manifests" {
     }
   }
 
-  depends_on = [
-    module.eks_cluster,
-    module.eks_node_group
-  ]
+  # depends_on = [
+  #   module.eks_cluster,
+  #   module.eks_node_group
+  # ]
 }
