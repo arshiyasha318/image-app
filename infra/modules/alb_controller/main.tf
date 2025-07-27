@@ -1,4 +1,28 @@
-# IAM Role for ALB Controller with OIDC
+terraform {
+  required_providers {
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.20"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.13"
+    }
+  }
+}
+
+# Fetch token to connect to EKS
+data "aws_eks_cluster_auth" "auth" {
+  name = var.cluster_name
+}
+
+provider "kubernetes" {
+  host                   = var.cluster_endpoint
+  cluster_ca_certificate = base64decode(var.cluster_ca)
+  token                  = data.aws_eks_cluster_auth.auth.token
+}
+
+#IAM Role for ALB Controller with OIDC
 resource "aws_iam_role" "alb_controller" {
   name = "alb-controller-irsa"
 

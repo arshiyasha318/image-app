@@ -54,39 +54,39 @@ module "eks_node_group" {
 } 
 
 
-data "aws_eks_cluster" "cluster" {
-  name = module.eks_cluster.cluster_name
-}
+# data "aws_eks_cluster" "cluster" {
+#   name = module.eks_cluster.cluster_name
+# }
 
-data "aws_eks_cluster_auth" "cluster" {
-  name = module.eks_cluster.cluster_name
-}
+# data "aws_eks_cluster_auth" "cluster" {
+#   name = module.eks_cluster.cluster_name
+# }
 
-provider "kubernetes" {
-  alias                  = "eks"
-  host                   = data.aws_eks_cluster.cluster.endpoint
-  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
-  token                  = data.aws_eks_cluster_auth.cluster.token
+# provider "kubernetes" {
+#   alias                  = "eks"
+#   host                   = data.aws_eks_cluster.cluster.endpoint
+#   cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
+#   token                  = data.aws_eks_cluster_auth.cluster.token
 
-}
+# }
 
-# ALB Controller module: provisions AWS Load Balancer Controller, depends on IAM and OIDC
-module "alb_controller" {
-  source = "./modules/alb_controller"
-  cluster_name        = module.eks_cluster.cluster_name
-  region              = var.region
-  vpc_id              = module.vpc.vpc_id
-  oidc_provider_arn   = module.oidc.oidc_provider_arn
-  oidc_provider_url   = module.oidc.oidc_provider_url_without_scheme
-  cluster_endpoint    = module.eks_cluster.cluster_endpoint
-  cluster_ca          = module.eks_cluster.certificate_authority 
+# # ALB Controller module: provisions AWS Load Balancer Controller, depends on IAM and OIDC
+# module "alb_controller" {
+#   source = "./modules/alb_controller"
+#   cluster_name        = module.eks_cluster.cluster_name
+#   region              = var.region
+#   vpc_id              = module.vpc.vpc_id
+#   oidc_provider_arn   = module.oidc.oidc_provider_arn
+#   oidc_provider_url   = module.oidc.oidc_provider_url_without_scheme
+#   cluster_endpoint    = module.eks_cluster.cluster_endpoint
+#   cluster_ca          = module.eks_cluster.certificate_authority 
 
-  providers = {
-    kubernetes = kubernetes.eks
-  }
+#   providers = {
+#     kubernetes = kubernetes.eks
+#   }
 
-  # depends_on = [ module.iam, module.oidc, module.eks_cluster , module.eks_node_group , module.vpc ]
-}
+#   # depends_on = [ module.iam, module.oidc, module.eks_cluster , module.eks_node_group , module.vpc ]
+# }
 
 # Route module: acm & Route53 records, 
 module "route" {
