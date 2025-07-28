@@ -140,9 +140,7 @@ resource "null_resource" "apply_k8s_manifests" {
       KUBECONFIG = "${pathexpand("~/.kube/config")}"
     }
   }
-   triggers = {
-    always_run = timestamp()
-  }
+  
 }
 
 
