@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -euo pipefail
+set -x  # Enable debug mode for detailed output
 
 # CONFIGURE THESE
 CLUSTER_NAME="image-app"
