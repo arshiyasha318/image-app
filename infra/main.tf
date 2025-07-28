@@ -100,10 +100,39 @@ module "route" {
 resource "null_resource" "apply_k8s_manifests" {
   provisioner "local-exec" {
     command = <<EOT
-      curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
-      sudo mv /tmp/eksctl /usr/local/bin
+      # Install eksctl if not present
+      if ! command -v eksctl &> /dev/null; then
+        echo "Installing eksctl..."
+        curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+        sudo mv /tmp/eksctl /usr/local/bin
+      fi
+
+      # Update kubeconfig
+      echo "Updating kubeconfig..."
       aws eks update-kubeconfig --region us-east-1 --name ${module.eks_cluster.cluster_name}
+
+      # Apply namespace first
+      echo "Applying namespace..."
+      kubectl apply -f ${path.module}/../k8s/namespace.yaml
+
+      # Wait for namespace to be active
+      echo "Waiting for namespace to become active..."
+      for i in {1..10}; do
+        if kubectl get namespace s3-access-sa &> /dev/null; then
+          echo "Namespace s3-access-sa is ready."
+          break
+        else
+          echo "Still waiting for namespace..."
+          sleep 2
+        fi
+      done
+
+      # Apply all other manifests
+      echo "Applying all manifests..."
       kubectl apply -f ${path.module}/../k8s/
+
+      # Install ALB Controller (custom script)
+      echo "Running ALB Controller script..."
       bash ${path.module}/../k8s/alb-controller.sh
     EOT
 
@@ -112,4 +141,5 @@ resource "null_resource" "apply_k8s_manifests" {
     }
   }
 }
+
 

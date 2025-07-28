@@ -1,0 +1,5 @@
+# k8s/s3-access-namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: s3-access-sa

@@ -2,84 +2,83 @@
 
 set -euo pipefail
 
-# ----- CONFIGURATION -----
-CLUSTER_NAME="image-app"
+# CONFIGURE THESE
+CLUSTER_NAME="your-eks-cluster-name"
 AWS_REGION="us-east-1"
 SERVICE_ACCOUNT_NAMESPACE="kube-system"
 SERVICE_ACCOUNT_NAME="aws-load-balancer-controller"
 POLICY_NAME="AWSLoadBalancerControllerIAMPolicy"
-POLICY_FILE_URL="https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/main/docs/install/iam_policy.json"
-CHART_VERSION="1.7.1"
-HELM_REPO="https://aws.github.io/eks-charts"
 
-ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-POLICY_ARN="arn:aws:iam::${ACCOUNT_ID}:policy/${POLICY_NAME}"
+# 1. Get OIDC provider
+OIDC_PROVIDER=$(aws eks describe-cluster \
+  --name "$CLUSTER_NAME" \
+  --region "$AWS_REGION" \
+  --query "cluster.identity.oidc.issuer" \
+  --output text | sed -e "s/^https:\/\///")
 
-echo "=== STEP 1: Download IAM policy ==="
-curl -s -o iam-policy.json "${POLICY_FILE_URL}" || {
-  echo "❌ Failed to download IAM policy JSON"
-  exit 1
+echo "[*] OIDC Provider: $OIDC_PROVIDER"
+
+# 2. Create IAM Role for ServiceAccount if not exists
+TRUST_POLICY=$(cat <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": "arn:aws:iam::$(aws sts get-caller-identity --query Account --output text):oidc-provider/$OIDC_PROVIDER"
+      },
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "$OIDC_PROVIDER:sub": "system:serviceaccount:$SERVICE_ACCOUNT_NAMESPACE:$SERVICE_ACCOUNT_NAME"
+        }
+      }
+    }
+  ]
 }
+EOF
+)
 
-echo "=== STEP 2: Create IAM policy (if not exists) ==="
-if ! aws iam get-policy --policy-arn "${POLICY_ARN}" >/dev/null 2>&1; then
-  aws iam create-policy \
-    --policy-name "${POLICY_NAME}" \
-    --policy-document file://iam-policy.json
-  echo "✅ IAM Policy created: ${POLICY_ARN}"
-else
-  echo "ℹ️  IAM Policy already exists: ${POLICY_ARN}"
-fi
+ROLE_NAME="AmazonEKSLoadBalancerControllerRole"
+aws iam create-role \
+  --role-name "$ROLE_NAME" \
+  --assume-role-policy-document "$TRUST_POLICY" \
+  || echo "[*] Role $ROLE_NAME already exists"
 
-echo "=== STEP 3: Associate OIDC provider with EKS ==="
-eksctl utils associate-iam-oidc-provider \
-  --cluster "${CLUSTER_NAME}" \
-  --approve \
-  --region "${AWS_REGION}" || {
-    echo "❌ Failed to associate OIDC provider"
-    exit 1
-}
+aws iam attach-role-policy \
+  --role-name "$ROLE_NAME" \
+  --policy-arn "arn:aws:iam::aws:policy/$POLICY_NAME"
 
-echo "=== STEP 4: Create IAM Role and ServiceAccount ==="
-if ! kubectl get serviceaccount "${SERVICE_ACCOUNT_NAME}" -n "${SERVICE_ACCOUNT_NAMESPACE}" >/dev/null 2>&1; then
-  eksctl create iamserviceaccount \
-    --cluster "${CLUSTER_NAME}" \
-    --namespace "${SERVICE_ACCOUNT_NAMESPACE}" \
-    --name "${SERVICE_ACCOUNT_NAME}" \
-    --attach-policy-arn "${POLICY_ARN}" \
-    --approve \
-    --override-existing-serviceaccounts \
-    --region "${AWS_REGION}" || {
-      echo "❌ Failed to create ServiceAccount and IAM Role"
-      exit 1
-  }
-  echo "✅ ServiceAccount ${SERVICE_ACCOUNT_NAME} created in namespace ${SERVICE_ACCOUNT_NAMESPACE}"
-else
-  echo "ℹ️  ServiceAccount ${SERVICE_ACCOUNT_NAME} already exists"
-fi
+# 3. Create Kubernetes service account with IRSA annotation
+kubectl create namespace $SERVICE_ACCOUNT_NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
 
-echo "=== STEP 5: Add Helm repo ==="
-helm repo add eks "${HELM_REPO}" || true
+kubectl delete serviceaccount "$SERVICE_ACCOUNT_NAME" -n "$SERVICE_ACCOUNT_NAMESPACE" --ignore-not-found
+
+kubectl create serviceaccount "$SERVICE_ACCOUNT_NAME" \
+  -n "$SERVICE_ACCOUNT_NAMESPACE" \
+  --dry-run=client -o yaml | kubectl apply -f -
+
+eksctl create iamserviceaccount \
+  --cluster "$CLUSTER_NAME" \
+  --region "$AWS_REGION" \
+  --namespace "$SERVICE_ACCOUNT_NAMESPACE" \
+  --name "$SERVICE_ACCOUNT_NAME" \
+  --attach-policy-arn "arn:aws:iam::aws:policy/$POLICY_NAME" \
+  --override-existing-serviceaccounts \
+  --approve
+
+# 4. Install the AWS Load Balancer Controller via Helm
+helm repo add eks https://aws.github.io/eks-charts
 helm repo update
 
-echo "=== STEP 6: Install AWS Load Balancer Controller ==="
-VPC_ID=$(aws eks describe-cluster \
-  --name "${CLUSTER_NAME}" \
-  --region "${AWS_REGION}" \
-  --query "cluster.resourcesVpcConfig.vpcId" \
-  --output text)
-
 helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-controller \
-  --namespace "${SERVICE_ACCOUNT_NAMESPACE}" \
-  --set clusterName="${CLUSTER_NAME}" \
-  --set serviceAccount.name="${SERVICE_ACCOUNT_NAME}" \
+  -n "$SERVICE_ACCOUNT_NAMESPACE" \
+  --set clusterName="$CLUSTER_NAME" \
+  --set region="$AWS_REGION" \
   --set serviceAccount.create=false \
-  --set region="${AWS_REGION}" \
-  --set vpcId="${VPC_ID}" \
-  --set ingressClass=alb \
-  --version "${CHART_VERSION}" || {
-    echo "❌ Helm install failed"
-    exit 1
-}
+  --set serviceAccount.name="$SERVICE_ACCOUNT_NAME" \
+  --set vpcId=$(aws eks describe-cluster --name "$CLUSTER_NAME" --region "$AWS_REGION" --query "cluster.resourcesVpcConfig.vpcId" --output text) \
+  --set image.repository=602401143452.dkr.ecr."$AWS_REGION".amazonaws.com/amazon/aws-load-balancer-controller
 
-echo "✅ AWS Load Balancer Controller installation complete"
+echo "[✔] AWS Load Balancer Controller installation complete."
