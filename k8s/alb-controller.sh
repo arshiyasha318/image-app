@@ -3,7 +3,7 @@
 set -euo pipefail
 
 # CONFIGURE THESE
-CLUSTER_NAME="your-eks-cluster-name"
+CLUSTER_NAME="image-app"
 AWS_REGION="us-east-1"
 SERVICE_ACCOUNT_NAMESPACE="kube-system"
 SERVICE_ACCOUNT_NAME="aws-load-balancer-controller"
