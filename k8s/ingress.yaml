@@ -13,7 +13,7 @@ metadata:
 spec:
   ingressClassName: alb
   rules:
-    - host: gallery.nagendraops.info
+    - host: gallery.arshiyaops.shop
       http:
         paths:
           - path: /api
