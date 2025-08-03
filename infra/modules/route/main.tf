@@ -1,12 +1,12 @@
 # Fetch Route 53 Zone
 data "aws_route53_zone" "main" {
-  name         = "nagendraops.info"  # change if needed
+  name         = "arshiyaops.shop"  # change if needed
   private_zone = false
 }
 
 # ACM Certificate
 resource "aws_acm_certificate" "cert" {
-  domain_name       = "gallery.nagendraops.info"
+  domain_name       = "gallery.arshiyaops.shop"
   validation_method = "DNS"
 
   lifecycle {
