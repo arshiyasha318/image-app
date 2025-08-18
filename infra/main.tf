@@ -154,10 +154,10 @@ resource "null_resource" "apply_k8s_manifests" {
 
 # Terraform block specifying required providers
 terraform { 
-  required_providers {
-    aws = {
-      source = "hashicorp/aws"
-      version = ">= 5.95.0, < 6.0.0"
-    }
-  }
+  # required_providers {
+  #   aws = {
+  #     source = "hashicorp/aws"
+  #     version = ">= 5.95.0, < 6.0.0"
+  #   }
+  # }
 }
