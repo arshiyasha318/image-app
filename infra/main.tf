@@ -151,3 +151,13 @@ resource "null_resource" "apply_k8s_manifests" {
 #   private_subnet_cidrs = module.vpc.private_subnet_ids   # Use subnet IDs, not CIDRs
 #   public_subnet_cidrs  = module.vpc.public_subnet_ids    # Use subnet IDs, not CIDRs
 # }
+
+# Terraform block specifying required providers
+terraform { 
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = ">= 5.95.0, < 6.0.0"
+    }
+  }
+}
