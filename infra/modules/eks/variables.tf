@@ -1,34 +1,29 @@
+# Name of the EKS cluster
 variable "cluster_name" {
-  type = string
+  description = "The name of the EKS cluster"
+  type        = string
 }
 
-variable "node_group_name" {
-  type = string
+# Version of the EKS cluster
+variable "eks_version" {
+  description = "The version of the EKS cluster"
+  type        = string
 }
 
-variable "desired_size" {
-  type = number
+# IAM role ARN for the EKS control plane
+variable "cluster_role_arn" {  
+  description = "The ARN of the IAM role for the EKS cluster"
+  type        = string
 }
 
-variable "max_size" {
-  type = number
-}
-
-variable "min_size" {
-  type = number
-}
-
-
-variable "vpc_id" {
-  type = string
-}
-
-variable "subnet_ids" {
-  type = list(string)
-}
-
-variable "instance_types" {
-  description = "Instance types for EKS node group"
+# List of private subnet IDs for the EKS cluster
+variable "private_subnet_cidrs" {
+  description = "List of private subnet IDs for the EKS cluster"
   type        = list(string)
-  default     = ["t3.medium"]
+}
+
+# List of public subnet IDs for the EKS cluster networking
+variable "public_subnet_cidrs" {
+  description = "List of public subnet IDs for the EKS cluster networking"
+  type        = list(string)
 }

@@ -1,65 +1,78 @@
-variable "instance_types" {
-  description = "Instance types for EKS node group"
-  type        = list(string)
-  default     = ["t3.medium"]
-}
-variable "vpc_cidr" {
-  description = "CIDR block for the VPC"
+# Version of the EKS cluster
+variable "eks_version" {
+  description = "The version of the EKS cluster"
   type        = string
 }
 
+# AWS region for all resources
+variable "region" {
+  description = "The AWS region where the EKS cluster will be created"
+  type        = string
+}
+
+# CIDR block for the VPC
+variable "vpc_cidr" {
+  description = "The CIDR block for the VPC"
+  type        = string
+}
+
+# List of public subnet CIDR blocks
 variable "public_subnets" {
   description = "List of public subnet CIDR blocks"
   type        = list(string)
-  default     = ["10.0.1.0/24"]
 }
 
+# List of private subnet CIDR blocks
 variable "private_subnets" {
   description = "List of private subnet CIDR blocks"
   type        = list(string)
-  default     = ["10.0.2.0/24"]
 }
 
+# List of availability zones for the EKS cluster
 variable "availability_zones" {
-  description = "Availability zones to deploy resources"
+  description = "List of availability zones for the EKS cluster"
   type        = list(string)
-  default     = ["us-east-1a"]
 }
 
-variable "cluster_name" {
-  description = "EKS cluster name"
-  type        = string
-}
-
-variable "node_group_name" {
-  description = "EKS node group name"
-  type        = string
-}
-
-variable "desired_size" {
-  description = "Desired node group size"
-  type        = number
-}
-
-variable "max_size" {
-  description = "Maximum node group size"
-  type        = number
-}
-
-variable "min_size" {
-  description = "Minimum node group size"
-  type        = number
-}
-
-# variable "instance_types" {
-#   description = "Instance types for EKS worker nodes"
-#   type        = string
-
-# }
-
+# Name of the S3 bucket for image uploads
 variable "s3_bucket_name" {
-  description = "Name of the S3 bucket for image uploads"
+  description = "The name of the S3 bucket for image uploads"
   type        = string
 }
 
+# Name of the EKS cluster
+variable "cluster_name" {
+  description = "The name of the EKS cluster"
+  type        = string 
+}
+
+# Name of the EKS node group
+variable "node_group_name" {
+  description = "The name of the EKS node group"
+  type        = string   
+}
+
+# List of instance types for the EKS node group
+variable "instance_types" {
+  description = "List of instance types for the EKS node group"
+  type        = list(string)
+}
+
+# Desired number of nodes in the EKS node group
+variable "desired_size" {
+  description = "Desired number of nodes in the EKS node group"
+  type        = number
+}
+
+# Minimum number of nodes in the EKS node group
+variable "min_size" {
+  description = "Minimum number of nodes in the EKS node group"
+  type        = number
+}
+
+# Maximum number of nodes in the EKS node group
+variable "max_size" {
+  description = "Maximum number of nodes in the EKS node group"
+  type        = number
+} 
 

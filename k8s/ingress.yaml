@@ -2,27 +2,27 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: image-app-ingress
+  namespace: s3-access-sa
   annotations:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
-    alb.ingress.kubernetes.io/backend-protocol: HTTP
     alb.ingress.kubernetes.io/group.name: image-app
-    alb.ingress.kubernetes.io/healthcheck-path: /
-    alb.ingress.kubernetes.io/subnets: subnet-xxxxxxxx,subnet-yyyyyyyy
-    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:257394477599:certificate/aa5c6275-4b5e-4715-8d01-60db8bf664cc
 spec:
+  ingressClassName: alb
   rules:
-    - host: your-domain.com
+    - host: gallery.arshiyaops.shop
       http:
         paths:
-          - path: /api/
+          - path: /api
             pathType: Prefix
             backend:
               service:
                 name: backend
                 port:
-                  number: 80
+                  number: 5000
           - path: /
             pathType: Prefix
             backend:

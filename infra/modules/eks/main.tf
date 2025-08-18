@@ -1,20 +1,19 @@
-module "eks" {
-  source          = "terraform-aws-modules/eks/aws"
-  version         = "20.37.2"
-  cluster_name    = var.cluster_name
-  cluster_version = "1.32"
-  subnet_ids      = var.subnet_ids
-  vpc_id          = var.vpc_id
-  # instance_types = ["t3.medium"] # Uncomment if you want to set a default
-  enable_irsa     = true
+# EKS Cluster resource: creates the EKS control plane
+resource "aws_eks_cluster" "image-app" {
+  name     = var.cluster_name
+  version  = var.eks_version
+  role_arn = var.cluster_role_arn
 
-  eks_managed_node_groups = {
-    default = {
-      name           = var.node_group_name
-      instance_type = var.instance_types
-      desired_size   = var.desired_size
-      max_size       = var.max_size
-      min_size       = var.min_size
-    }
+  tags = {
+    Name = "image-app-eks-cluster"
+  }
+
+  enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+
+  # Configure networking for the EKS cluster
+  vpc_config {
+    subnet_ids = concat(var.private_subnet_cidrs, var.public_subnet_cidrs) # Use both private and public subnets
   }
 }
+
+

@@ -1,11 +1,14 @@
 output "cluster_name" {
-  value = module.eks.cluster_name
+  value = aws_eks_cluster.image-app.name
+}
+output "endpoint" {
+  value = aws_eks_cluster.image-app.endpoint
+}
+output "certificate_authority" {
+  value = aws_eks_cluster.image-app.certificate_authority[0].data
 }
 
-output "oidc_provider_arn" {
-  value = module.eks.oidc_provider_arn
+output "cluster_endpoint" {
+  value = aws_eks_cluster.image-app.endpoint
 }
 
-output "alb_dns_name" {
-  value = module.eks.cluster_endpoint
-}
