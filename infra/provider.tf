@@ -19,7 +19,7 @@ terraform {
   backend "s3" {
     bucket         = "image-terraform-state-bucket"   
     key            = "eks-image-app/terraform.tfstate"
-    region         = "us-east-1"
+    region         = var.region
     encrypt        = true
     use_lockfile   = true
   }

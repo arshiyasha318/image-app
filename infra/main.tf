@@ -1,7 +1,6 @@
 # VPC module: provisions networking resources (VPC, subnets, etc.)
 module "vpc" {
   source = "./modules/vpc"
-
   cidr_block            = var.vpc_cidr
   availability_zones    = var.availability_zones
   public_subnet_cidrs   = var.public_subnets
@@ -144,3 +143,11 @@ resource "null_resource" "apply_k8s_manifests" {
 }
 
 
+# module "eks_cluster" {
+#   source            = "./modules/eks"
+#   cluster_name      = var.cluster_name
+#   eks_version       = var.eks_version
+#   cluster_role_arn  = module.iam.eks_cluster_role_arn
+#   private_subnet_cidrs = module.vpc.private_subnet_ids   # Use subnet IDs, not CIDRs
+#   public_subnet_cidrs  = module.vpc.public_subnet_ids    # Use subnet IDs, not CIDRs
+# }
